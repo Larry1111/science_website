@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>frontier.log — a signal, not a feed</title>
+<meta name="description" content="A time-series tracker for frontier technology: AGI, quantum computing, fusion, brain-computer interfaces. Curated breakthroughs, not doom-scroll." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #F7F5F0;
+    --ink: #141410;
+    --ink-2: #52514E;
+    --ink-3: #898781;
+    --rule: #D8D5CC;
+    --grid: #E4E1D8;
+    --card: #FDFCFA;
+    --accent-c: #2a78d6;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --font-body: "Inter", -apple-system, system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #14140F;
+      --ink: #F0EDE3;
+      --ink-2: #A8A69B;
+      --ink-3: #6E6C63;
+      --rule: #2A2924;
+      --grid: #24231F;
+      --card: #1B1A16;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  header.masthead {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 36px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .wordmark .slash { color: var(--accent-c); font-style: normal; padding: 0 2px; }
+
+  .masthead-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    text-align: right;
+    line-height: 1.5;
+  }
+  .masthead-meta .kv { display: flex; gap: 8px; justify-content: flex-end; }
+  .masthead-meta .k { color: var(--ink-3); }
+  .masthead-meta .v { color: var(--ink-2); }
+
+  .lede {
+    max-width: 560px;
+    font-size: 16px;
+    color: var(--ink-2);
+    margin: 0 0 32px;
+    line-height: 1.6;
+  }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { border-color: var(--ink-2); color: var(--ink); }
+  .chip.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .chip .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+
+  .chart-frame {
+    border: 1px solid var(--rule);
+    background: var(--card);
+    padding: 20px 8px 8px 8px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .chart-corner {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .chart-corner-right {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .chart-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    margin-top: 8px;
+  }
+
+  .chart-controls {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+  .range-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .range-btn:hover { border-color: var(--ink-2); color: var(--ink); }
+  .range-btn.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .range-spacer { flex: 1; }
+
+  .event-panel {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent-c);
+    padding: 20px 24px;
+    min-height: 140px;
+  }
+  .ep-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ep-field { font-weight: 500; }
+  .ep-sep { color: var(--ink-3); }
+  .ep-date { color: var(--ink-3); }
+  .ep-score { margin-left: auto; color: var(--ink-3); }
+  .ep-score .v { color: var(--ink); font-weight: 500; }
+
+  .ep-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .ep-desc {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink-2);
+    margin: 0;
+  }
+  .ep-links {
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .ep-links a {
+    color: var(--accent-c);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 1px;
+    transition: border-color 0.15s ease;
+  }
+  .ep-links a:hover { border-bottom-color: var(--accent-c); }
+
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule);
+  }
+
+  .ep-actions { margin-left: auto; display: flex; gap: 12px; }
+  .btn-quiet {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    color: var(--ink-3);
+    cursor: pointer;
+    padding: 0 0 1px;
+    border-bottom: 1px solid transparent;
+  }
+  .btn-quiet:hover { color: var(--ink); border-bottom-color: var(--ink-2); }
+
+  /* ---------- signal feed ---------- */
+  .feed { margin-top: 48px; }
+  .feed-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    margin-bottom: 0;
+  }
+  .feed-title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 400;
+    margin: 0;
+  }
+  .feed-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+  .feed-search {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--card);
+    color: var(--ink);
+    width: 220px;
+    max-width: 100%;
+  }
+  .feed-search::placeholder { color: var(--ink-3); }
+  .feed-search:focus { outline: none; border-color: var(--ink-2); }
+
+  .caught-up {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .caught-up .check { color: var(--accent-c); }
+
+  .feed-year {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    padding: 20px 0 6px;
+  }
+
+  .feed-row {
+    display: grid;
+    grid-template-columns: 92px 44px 1fr auto;
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 8px;
+    margin: 0 -8px;
+    border-bottom: 1px solid var(--grid);
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+  .feed-row:hover { background: var(--card); }
+  .feed-row.selected { background: var(--card); box-shadow: inset 3px 0 0 var(--accent-c); }
+  .feed-row:focus-visible { outline: 2px solid var(--accent-c); outline-offset: -2px; }
+
+  .fr-date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .fr-field {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .fr-field .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+  .fr-title { font-size: 14px; line-height: 1.45; }
+  .fr-title .new-chip {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--accent-c);
+    border-radius: 2px;
+    padding: 1px 5px;
+    margin-left: 8px;
+    vertical-align: 2px;
+  }
+  .fr-score {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    white-space: nowrap;
+    text-align: right;
+  }
+  .fr-delta { font-size: 10px; margin-left: 6px; }
+  .fr-delta.up { color: #1baf7a; }
+  .fr-delta.down { color: #c14a3a; }
+
+  .feed-empty {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    padding: 24px 0;
+  }
+
+  .kbd-hint {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    margin-top: 12px;
+  }
+  .kbd-hint kbd {
+    font-family: inherit;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 0 5px;
+    background: var(--card);
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 24px 16px 60px; }
+    .wordmark { font-size: 28px; }
+    .lede { font-size: 15px; }
+    .chart-canvas-wrap { height: 320px; }
+    .ep-title { font-size: 19px; }
+    .masthead-meta { text-align: left; }
+    .masthead-meta .kv { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header class="masthead">
+    <div class="wordmark">frontier<span class="slash">/</span>log</div>
+    <div class="masthead-meta">
+      <div class="kv"><span class="k">last update</span><span class="v" id="last-update">2026-07-03</span></div>
+      <div class="kv"><span class="k">signals</span><span class="v" id="signal-count">—</span></div>
+    </div>
+  </header>
+
+  <p class="lede">
+    A time-series index of what actually moved across four frontier fields.
+    Zoom into any range on the chart, click a point to read the breakthrough behind it.
+    Updated on Fridays. No infinite feed.
+  </p>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="chart-frame">
+    <div class="chart-corner">progress index</div>
+    <div class="chart-corner-right" id="range-readout">2019 → 2026</div>
+    <div class="chart-canvas-wrap">
+      <canvas id="chart" role="img" aria-label="Progress index across AGI, quantum, fusion, and BCI from 2019 to 2026"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-controls">
+    <button class="range-btn" data-range="1y">1Y</button>
+    <button class="range-btn" data-range="3y">3Y</button>
+    <button class="range-btn active" data-range="all">All</button>
+    <div class="range-spacer"></div>
+    <button class="range-btn" id="reset-zoom">Reset zoom</button>
+  </div>
+
+  <div class="event-panel" id="event-panel">
+    <div class="ep-header">
+      <span class="ep-field" id="ep-field">AGI</span>
+      <span class="ep-sep">·</span>
+      <span class="ep-date" id="ep-date">2026 Q1</span>
+      <span class="ep-score">signal <span class="v" id="ep-score">94</span></span>
+    </div>
+    <h2 class="ep-title" id="ep-title">Hover a point on the chart</h2>
+    <p class="ep-desc" id="ep-desc">Each dot on the chart above is a real breakthrough. Hover to read what happened; click to keep it pinned.</p>
+    <div class="ep-links" id="ep-links"></div>
+    <div class="hint">tip: drag horizontally on the chart to zoom · <kbd>←</kbd>/<kbd>→</kbd> step through signals · <span class="btn-quiet" id="copy-link" role="button" tabindex="0">copy link to this signal</span></div>
+  </div>
+
+  <section class="feed" aria-label="Signal feed">
+    <div class="feed-header">
+      <h2 class="feed-title">signal feed</h2>
+      <span class="feed-count" id="feed-count"></span>
+      <input class="feed-search" id="feed-search" type="search" placeholder="search signals…" aria-label="Search signals" />
+    </div>
+    <div class="caught-up"><span class="check">✓</span> you're caught up — next batch ships friday</div>
+    <div id="feed-list"></div>
+  </section>
+
+  <footer>
+    <div>frontier.log · curated tech signals</div>
+    <div id="footer-updated">rev 2026.07.03</div>
+  </footer>
+
+</div>
+
+<script src="./data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+<script src="./app.js"></script>
+
+</body>
+</html>

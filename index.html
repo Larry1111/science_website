@@ -125,6 +125,7 @@
   .ep-score .v { color: var(--ink); font-weight: 500; font-size: 13px; }
   .ep-title { font-family: var(--font-display); font-size: 24px; font-weight: 500; line-height: 1.25; letter-spacing: -0.01em; margin: 0 0 10px; color: var(--ink); }
   .ep-desc { font-size: 15px; line-height: 1.65; color: var(--ink-2); margin: 0; }
+  .ep-metric { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--ink-3); margin: 10px 0 0; padding-top: 10px; border-top: 1px dashed var(--rule); }
   
   .ep-links { margin-top: 16px; font-family: var(--font-mono); font-size: 12px; display: flex; gap: 20px; flex-wrap: wrap; }
   .ep-links a { color: var(--accent-c); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; transition: border-color 0.15s ease; }
@@ -177,6 +178,36 @@
 
   footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
+  /* Methodology overlay */
+  .methodology-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(20,20,16,0.45); backdrop-filter: blur(2px);
+    display: flex; justify-content: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  .methodology-overlay.open { opacity: 1; pointer-events: auto; }
+  .methodology-panel {
+    width: min(560px, 100%); height: 100%; overflow-y: auto;
+    background: var(--paper); border-left: 1px solid var(--rule);
+    padding: 32px 28px 60px; box-shadow: -12px 0 32px rgba(0,0,0,0.15);
+    transform: translateX(24px); transition: transform 0.25s ease;
+  }
+  .methodology-overlay.open .methodology-panel { transform: translateX(0); }
+  .methodology-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .methodology-head h2 { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 26px; margin: 0; }
+  .methodology-intro { font-size: 14px; line-height: 1.65; color: var(--ink-2); margin: 16px 0 32px; padding-bottom: 20px; border-bottom: 1px solid var(--rule); }
+  .mf-block { margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px dashed var(--rule); }
+  .mf-block:last-child { border-bottom: none; }
+  .mf-title { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; margin-bottom: 10px; }
+  .mf-title .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .mf-metric { font-size: 15px; line-height: 1.6; color: var(--ink); margin: 0 0 10px; }
+  .mf-formula { font-family: var(--font-mono); font-size: 12.5px; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; margin: 0 0 10px; color: var(--ink-2); overflow-x: auto; }
+  .mf-anchors, .mf-caveat { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); margin: 0 0 10px; }
+  .mf-caveat { font-style: italic; }
+  .mf-sources { font-family: var(--font-mono); font-size: 11.5px; display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .mf-sources a { color: var(--accent-c); text-decoration: none; }
+  .mf-sources a:hover { text-decoration: underline; }
+
   @media (max-width: 640px) {
     .container { padding: 24px 16px 60px; }
     .wordmark { font-size: 28px; }
@@ -209,6 +240,7 @@
   <p class="lede">
     A time-series index of what actually moved across four frontier fields.
     Zoom into any range on the chart, click a point to read the breakthrough behind it.
+    Every index number is derived from a real, cited metric — <span class="btn-quiet" id="open-methodology" role="button" tabindex="0">see how it's calculated</span>.
   </p>
 
   <div class="filters" id="filters"></div>
@@ -234,10 +266,11 @@
       <span class="ep-field" id="ep-field">AGI</span>
       <span class="ep-sep">·</span>
       <span class="ep-date" id="ep-date">2026 Q1</span>
-      <span class="ep-score">signal <span class="v" id="ep-score">94</span></span>
+      <span class="ep-score">index <span class="v" id="ep-score">94</span></span>
     </div>
     <h2 class="ep-title" id="ep-title">Hover a point on the chart</h2>
     <p class="ep-desc" id="ep-desc">Each dot on the chart above is a real breakthrough. Hover to read what happened; click to keep it pinned.</p>
+    <p class="ep-metric" id="ep-metric"></p>
     <div class="ep-links" id="ep-links"></div>
     <div class="hint">tip: drag horizontally on the chart to zoom · <kbd>←</kbd>/<kbd>→</kbd> step through signals · <span class="btn-quiet" id="copy-link" role="button" tabindex="0">copy link to this signal</span></div>
   </div>
@@ -266,6 +299,20 @@
     <div id="footer-updated">rev 2026.07.03</div>
   </footer>
 
+</div>
+
+<div id="methodology-overlay" class="methodology-overlay" aria-hidden="true">
+  <div class="methodology-panel" role="dialog" aria-label="About the index">
+    <div class="methodology-head">
+      <h2>What do these numbers mean?</h2>
+      <button id="close-methodology" class="btn-quiet" aria-label="Close">close ✕</button>
+    </div>
+    <p class="methodology-intro">
+      Every field tracks a different real-world metric — there's no physical property shared by an AI benchmark, a qubit count, a fusion Q value, and a neural interface's bit rate.
+      To plot them on one 0–100 axis, each metric is normalized against an anchor that represents a widely-cited "done" threshold for that field. The number is a comparison of momentum, not a claim that the fields are equivalent.
+    </p>
+    <div id="methodology-fields"></div>
+  </div>
 </div>
 
 <script src="./data.js"></script>

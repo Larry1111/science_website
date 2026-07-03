@@ -65,8 +65,22 @@
   for (const e of all) {
     eventsByField[e.field].push({
       x: e.x, y: e.score, date: e.date, title: e.title,
-      desc: e.desc, links: e.links, delta: e.delta, slug: slug(e), added: e.added, score: e.score
+      desc: e.desc, links: e.links, delta: e.delta, slug: slug(e), added: e.added, score: e.score,
+      metric: e.metric || null
     });
+  }
+
+  /* ---------- metric formatting ---------- */
+  const BASIS_LABEL = { measured: "measured", estimated: "trend estimate", qualitative: "qualitative" };
+  function fmtMetric(m) {
+    if (!m) return "";
+    const basis = m.basis ? BASIS_LABEL[m.basis] || m.basis : "";
+    if (m.value == null) {
+      return (m.label || "") + (basis ? " \u00b7 " + basis : "");
+    }
+    const label = m.label ? m.label : "";
+    const valStr = m.value + (m.unit ? " " + m.unit : "");
+    return valStr + (label && label !== valStr ? " \u2014 " + label : "") + (basis ? " \u00b7 " + basis : "");
   }
 
   const bySlug = {};
@@ -134,9 +148,14 @@
             title: (items) => {
               const r = items[0].raw;
               const d = r.delta == null ? "" : "  ·  " + (r.delta >= 0 ? "+" : "") + r.delta;
-              return fmtQ(r.x) + "  ·  signal " + r.y + d;
+              return fmtQ(r.x) + "  ·  index " + r.y + d;
             },
-            label: (item) => item.raw.title
+            label: (item) => {
+              const r = item.raw;
+              const lines = [r.title];
+              if (r.metric) lines.push(fmtMetric(r.metric));
+              return lines;
+            }
           }
         },
         zoom: {
@@ -181,6 +200,7 @@
   const epScore = document.getElementById("ep-score");
   const epTitle = document.getElementById("ep-title");
   const epDesc = document.getElementById("ep-desc");
+  const epMetric = document.getElementById("ep-metric");
   const epLinks = document.getElementById("ep-links");
   const LINK_ICONS = { video: "▶", paper: "¶", post: "✎", code: "⌘" };
 
@@ -194,6 +214,10 @@
     epScore.innerHTML = `<span class="v">${point.y}</span>${d}`;
     epTitle.textContent = point.title;
     epDesc.textContent = point.desc;
+    if (epMetric) {
+      epMetric.textContent = point.metric ? fmtMetric(point.metric) : "";
+      epMetric.style.display = point.metric ? "block" : "none";
+    }
     epLinks.innerHTML = point.links
       .map((l) => {
         const icon = l.type && LINK_ICONS[l.type] ? LINK_ICONS[l.type] + " " : "";
@@ -414,6 +438,45 @@
   });
   feedSearch.addEventListener("input", renderFeed);
   feedSort.addEventListener("change", renderFeed);
+
+  /* ---------- methodology overlay ---------- */
+  const methOverlay = document.getElementById("methodology-overlay");
+  const methFieldsEl = document.getElementById("methodology-fields");
+  const esc2 = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function renderMethodology() {
+    let html = "";
+    for (const key of Object.keys(fields)) {
+      const f = fields[key];
+      const m = f.methodology;
+      if (!m) continue;
+      html += `
+        <div class="mf-block">
+          <div class="mf-title" style="color:${f.text}"><span class="dot" style="background:${f.color}"></span>${esc2(f.label)}</div>
+          <p class="mf-metric"><strong>Tracks:</strong> ${esc2(m.metric)}</p>
+          <div class="mf-formula">${esc2(m.formula)}</div>
+          <p class="mf-anchors">${esc2(m.anchors)}</p>
+          <p class="mf-caveat">${esc2(m.basisNote)}</p>
+          <div class="mf-sources">${(m.sources || []).map((s) => `<a href="${s.url}" target="_blank" rel="noopener">↗ ${esc2(s.label)}</a>`).join("")}</div>
+        </div>`;
+    }
+    methFieldsEl.innerHTML = html;
+  }
+  renderMethodology();
+
+  function openMethodology() {
+    methOverlay.classList.add("open");
+    methOverlay.setAttribute("aria-hidden", "false");
+  }
+  function closeMethodology() {
+    methOverlay.classList.remove("open");
+    methOverlay.setAttribute("aria-hidden", "true");
+  }
+  document.getElementById("open-methodology").addEventListener("click", openMethodology);
+  document.getElementById("open-methodology").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMethodology(); } });
+  document.getElementById("close-methodology").addEventListener("click", closeMethodology);
+  methOverlay.addEventListener("click", (e) => { if (e.target === methOverlay) closeMethodology(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && methOverlay.classList.contains("open")) closeMethodology(); });
 
   /* ---------- init ---------- */
   document.getElementById("signal-count").textContent = String(events.length).padStart(3, "0");

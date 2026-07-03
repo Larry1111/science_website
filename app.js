@@ -2,6 +2,10 @@
   const { fields, events } = window.FRONTIER_DATA;
 
   /* ---------- theme handling ---------- */
+  // NOTE: intentionally NOT named `chart` — the canvas below has id="chart",
+  // and browsers auto-expose elements with an id as window.<id>, which would
+  // shadow/collide with a chart variable of the same name.
+  let chartInstance = null;
   const themeBtn = document.getElementById("theme-toggle");
   let isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   if (localStorage.getItem("theme")) {
@@ -11,12 +15,12 @@
   function applyTheme() {
     if (isDark) document.body.classList.add("dark-mode");
     else document.body.classList.remove("dark-mode");
-    if (window.chart) {
-      chart.options.scales.x.grid.color = cssGrid();
-      chart.options.scales.y.grid.color = cssGrid();
-      chart.options.scales.x.ticks.color = cssInk3();
-      chart.options.scales.y.ticks.color = cssInk3();
-      chart.update();
+    if (chartInstance) {
+      chartInstance.options.scales.x.grid.color = cssGrid();
+      chartInstance.options.scales.y.grid.color = cssGrid();
+      chartInstance.options.scales.x.ticks.color = cssInk3();
+      chartInstance.options.scales.y.ticks.color = cssInk3();
+      chartInstance.update();
     }
   }
   applyTheme();
@@ -111,7 +115,7 @@
   let pinned = false;
   let selectedSlug = null;
 
-  window.chart = new Chart(document.getElementById("chart"), {
+  chartInstance = new Chart(document.getElementById("chart"), {
     type: "line",
     data: { datasets: buildDatasets() },
     options: {
@@ -207,13 +211,13 @@
 
     if (history.replaceState) history.replaceState(null, "", "#" + sl);
 
-    const dsIndex = chart.data.datasets.findIndex((d) => d.fieldKey === e.field);
+    const dsIndex = chartInstance.data.datasets.findIndex((d) => d.fieldKey === e.field);
     if (dsIndex >= 0) {
-      const ptIndex = chart.data.datasets[dsIndex].data.findIndex((p) => p.slug === sl);
+      const ptIndex = chartInstance.data.datasets[dsIndex].data.findIndex((p) => p.slug === sl);
       if (ptIndex >= 0) {
-        chart.setActiveElements([{ datasetIndex: dsIndex, index: ptIndex }]);
-        chart.tooltip.setActiveElements([{ datasetIndex: dsIndex, index: ptIndex }], { x: 0, y: 0 });
-        chart.update();
+        chartInstance.setActiveElements([{ datasetIndex: dsIndex, index: ptIndex }]);
+        chartInstance.tooltip.setActiveElements([{ datasetIndex: dsIndex, index: ptIndex }], { x: 0, y: 0 });
+        chartInstance.update();
       }
     }
 
@@ -301,15 +305,15 @@
       else c.classList.toggle("active", activeFields.has(k));
     });
 
-    chart.data.datasets = buildDatasets();
-    chart.update();
+    chartInstance.data.datasets = buildDatasets();
+    chartInstance.update();
     renderFeed();
   });
 
   /* ---------- range buttons ---------- */
   const rangeReadout = document.getElementById("range-readout");
   function updateRangeReadout() {
-    const xs = chart.options.scales.x;
+    const xs = chartInstance.options.scales.x;
     rangeReadout.textContent = Math.floor(xs.min) + " → " + Math.ceil(xs.max);
   }
 
@@ -318,23 +322,23 @@
       document.querySelectorAll(".range-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       const r = btn.dataset.range;
-      const xs = chart.options.scales.x;
+      const xs = chartInstance.options.scales.x;
       if (r === "1y") { xs.min = 2025.5; xs.max = 2026.75; }
       else if (r === "3y") { xs.min = 2023.5; xs.max = 2026.75; }
       else { xs.min = 2018.75; xs.max = 2026.75; }
-      chart.update();
+      chartInstance.update();
       updateRangeReadout();
     });
   });
 
   document.getElementById("reset-zoom").addEventListener("click", () => {
-    chart.resetZoom();
-    const xs = chart.options.scales.x;
+    chartInstance.resetZoom();
+    const xs = chartInstance.options.scales.x;
     xs.min = 2018.75;
     xs.max = 2026.75;
     document.querySelectorAll(".range-btn").forEach((b) => b.classList.remove("active"));
     document.querySelector('.range-btn[data-range="all"]').classList.add("active");
-    chart.update();
+    chartInstance.update();
     updateRangeReadout();
   });
 

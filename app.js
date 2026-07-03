@@ -332,8 +332,16 @@
   /* ---------- signal feed ---------- */
   const feedList = document.getElementById("feed-list");
   const feedCount = document.getElementById("feed-count");
+  const feedNew = document.getElementById("feed-new");
   const feedSearch = document.getElementById("feed-search");
   const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function renderFeedNew() {
+    const newCount = all.filter((e) => activeFields.has(e.field) && isNew(e)).length;
+    feedNew.innerHTML = newCount
+      ? `<span class="dot-pulse"></span> ${newCount} new signal${newCount === 1 ? "" : "s"} this week`
+      : "no new signals in the last " + NEW_WINDOW_DAYS + " days";
+  }
 
   function renderFeed() {
     const q = feedSearch.value.trim().toLowerCase();
@@ -343,9 +351,14 @@
       .sort((a, b) => b.x - a.x);
 
     feedCount.textContent = rows.length + " signal" + (rows.length === 1 ? "" : "s");
+    renderFeedNew();
 
     if (!rows.length) {
-      feedList.innerHTML = `<div class="feed-empty">no signals match — try a broader search</div>`;
+      feedList.innerHTML = `<div class="feed-empty">no signals match “${esc(feedSearch.value.trim())}” — <span class="btn-quiet" id="feed-clear" role="button" tabindex="0">clear search</span></div>`;
+      const clearBtn = document.getElementById("feed-clear");
+      const clear = () => { feedSearch.value = ""; renderFeed(); feedSearch.focus(); };
+      clearBtn.addEventListener("click", clear);
+      clearBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); clear(); } });
       return;
     }
 
@@ -355,15 +368,12 @@
       const y = Math.floor(e.x);
       if (y !== year) { year = y; html += `<div class="feed-year">${y}</div>`; }
       const f = fields[e.field];
-      const d = e.delta == null ? "" :
-        `<span class="fr-delta ${e.delta >= 0 ? "up" : "down"}">${e.delta >= 0 ? "+" : ""}${e.delta}</span>`;
       const nw = isNew(e) ? `<span class="new-chip">new</span>` : "";
       html += `
         <div class="feed-row${slug(e) === selectedSlug ? " selected" : ""}" data-slug="${slug(e)}" tabindex="0" role="button" aria-label="${esc(e.title)}">
           <span class="fr-date">${fmtQ(e.x)}</span>
           <span class="fr-field" style="color:${f.text}"><span class="dot" style="background:${f.color}"></span>${f.short}</span>
           <span class="fr-title">${esc(e.title)}${nw}</span>
-          <span class="fr-score">${e.score}${d}</span>
         </div>`;
     }
     feedList.innerHTML = html;

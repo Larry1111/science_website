@@ -298,8 +298,33 @@
     letter-spacing: 0.08em;
     color: var(--ink-3);
   }
+
+  .feed-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .feed-new {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feed-new .dot-pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-c);
+    display: inline-block;
+  }
   .feed-search {
-    margin-left: auto;
     font-family: var(--font-mono);
     font-size: 12px;
     padding: 6px 10px;
@@ -313,20 +338,6 @@
   .feed-search::placeholder { color: var(--ink-3); }
   .feed-search:focus { outline: none; border-color: var(--ink-2); }
 
-  .caught-up {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-3);
-    padding: 14px 0;
-    border-bottom: 1px dashed var(--rule);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .caught-up .check { color: var(--accent-c); }
-
   .feed-year {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -337,7 +348,7 @@
 
   .feed-row {
     display: grid;
-    grid-template-columns: 92px 44px 1fr auto;
+    grid-template-columns: 84px 42px 1fr;
     gap: 12px;
     align-items: baseline;
     padding: 10px 8px;
@@ -361,6 +372,7 @@
     font-size: 10px;
     letter-spacing: 0.08em;
     font-weight: 500;
+    white-space: nowrap;
   }
   .fr-field .dot {
     display: inline-block;
@@ -382,23 +394,30 @@
     padding: 1px 5px;
     margin-left: 8px;
     vertical-align: 2px;
-  }
-  .fr-score {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--ink-2);
     white-space: nowrap;
-    text-align: right;
   }
-  .fr-delta { font-size: 10px; margin-left: 6px; }
-  .fr-delta.up { color: #1baf7a; }
-  .fr-delta.down { color: #c14a3a; }
 
   .feed-empty {
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--ink-3);
     padding: 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .feed-empty .btn-quiet { color: var(--accent-c); }
+
+  @media (max-width: 640px) {
+    .feed-row {
+      grid-template-columns: 1fr auto;
+      row-gap: 4px;
+    }
+    .fr-date { order: 2; text-align: right; }
+    .fr-field { order: 1; }
+    .fr-title { grid-column: 1 / -1; order: 3; }
+    .feed-search { width: 100%; }
+    .feed-toolbar { flex-direction: column; align-items: stretch; }
   }
 
   .kbd-hint {
@@ -496,9 +515,11 @@
     <div class="feed-header">
       <h2 class="feed-title">signal feed</h2>
       <span class="feed-count" id="feed-count"></span>
+    </div>
+    <div class="feed-toolbar">
+      <span class="feed-new" id="feed-new"></span>
       <input class="feed-search" id="feed-search" type="search" placeholder="search signals…" aria-label="Search signals" />
     </div>
-    <div class="caught-up"><span class="check">✓</span> you're caught up — next batch ships friday</div>
     <div id="feed-list"></div>
   </section>
 

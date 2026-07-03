@@ -5,165 +5,36 @@ window.FRONTIER_DATA = {
     fusion:  { label: "Fusion",    short: "FUS",  color: "#eda100", text: "#854F0B" },
     bci:     { label: "BCI",       short: "BCI",  color: "#4a3aa7", text: "#3C3489" }
   },
-
-  // link.type is optional: "paper" | "video" | "post" | "code" — drives the icon.
-  // event.added is optional ISO date; entries added within 10 days show a "new" chip.
   events: [
-    { field: "agi", date: "2019-Q1", score: 5,
-      title: "GPT-2 announced (staged release)",
-      desc: "OpenAI announces a 1.5B parameter LM but withholds full release citing potential misuse risks.",
-      links: [{ type: "post", label: "OpenAI blog", url: "https://openai.com/research/better-language-models" }] },
-
-    { field: "agi", date: "2020-Q2", score: 15,
-      title: "GPT-3 paper",
-      desc: "175B parameter model demonstrates few-shot learning at scale — the first hint that scaling alone continues to work.",
-      links: [{ type: "paper", label: "arXiv", url: "https://arxiv.org/abs/2005.14165" }] },
-
-    { field: "agi", date: "2022-Q2", score: 25,
-      title: "Diffusion image models go mainstream",
-      desc: "DALL-E 2, Imagen, and Stable Diffusion release within months of each other. Open-weight release of SD reshapes downstream tooling.",
-      links: [{ type: "post", label: "SD announcement", url: "https://stability.ai/news/stable-diffusion-public-release" }] },
-
-    { field: "agi", date: "2022-Q4", score: 42,
-      title: "ChatGPT launch",
-      desc: "The consumer moment for LLMs — 100M users in two months. Chat interface, not the model, is the product surface.",
-      links: [{ type: "post", label: "OpenAI announcement", url: "https://openai.com/blog/chatgpt" }] },
-
-    { field: "agi", date: "2023-Q1", score: 55,
-      title: "GPT-4 and the multimodal frontier",
-      desc: "GPT-4 launches with image input and stronger reasoning. Claude and open-weight LLaMA follow within the same quarter.",
-      links: [{ type: "post", label: "GPT-4 report", url: "https://openai.com/research/gpt-4" }] },
-
-    { field: "agi", date: "2024-Q1", score: 68,
-      title: "Sora, Claude 3, Gemini 1.5",
-      desc: "Video generation, 200K context, and million-token context arrive together. Long-context becomes table stakes.",
-      links: [] },
-
-    { field: "agi", date: "2024-Q3", score: 78,
-      title: "o1-style reasoning models",
-      desc: "Test-time compute scaling shows durable gains on hard reasoning benchmarks. A second scaling axis opens.",
-      links: [] },
-
-    { field: "agi", date: "2025-Q2", score: 86,
-      title: "Agentic frontier consolidation",
-      desc: "Claude 4, GPT-5, and Gemini 2 push multi-step agent capabilities into production.",
-      links: [] },
-
-    { field: "agi", date: "2026-Q1", score: 94,
-      title: "Sparse MoD scaling laws hold at 400B",
-      desc: "DeepMind paper shows adaptive compute allocation continues efficiency gains past the point earlier work expected saturation.",
-      added: "2026-06-28",
-      links: [] },
-
-
-    { field: "quantum", date: "2019-Q4", score: 10,
-      title: "Google quantum supremacy claim",
-      desc: "Sycamore samples a distribution classical supercomputers cannot practically reproduce. Contested, but a threshold moment.",
-      links: [{ type: "paper", label: "Nature paper", url: "https://www.nature.com/articles/s41586-019-1666-5" }] },
-
-    { field: "quantum", date: "2021-Q4", score: 20,
-      title: "IBM Eagle — 127 qubits",
-      desc: "First >100 qubit processor from IBM. Qubit-count race begins in earnest.",
-      links: [] },
-
-    { field: "quantum", date: "2022-Q4", score: 30,
-      title: "IBM Osprey — 433 qubits",
-      desc: "Qubit count more than triples in a year, but coherence and gate fidelity remain the binding constraints.",
-      links: [] },
-
-    { field: "quantum", date: "2023-Q4", score: 40,
-      title: "IBM Condor — 1121 qubits",
-      desc: "First >1000 qubit device. Focus shifts from raw count to error correction.",
-      links: [] },
-
-    { field: "quantum", date: "2024-Q4", score: 62,
-      title: "Google Willow: below-threshold error correction",
-      desc: "Logical error rate drops as physical qubit count grows — the crossover the field had been waiting for.",
-      links: [{ type: "post", label: "Google blog", url: "https://blog.google/technology/research/google-willow-quantum-chip/" }] },
-
-    { field: "quantum", date: "2025-Q3", score: 72,
-      title: "Multiple platforms reach 1000+ qubits",
-      desc: "Superconducting, trapped-ion, and neutral-atom systems reach comparable scales. Modality competition sharpens.",
-      links: [] },
-
-    { field: "quantum", date: "2026-Q2", score: 85,
-      title: "Independent lab confirms below-threshold on a second architecture",
-      desc: "Second team replicates surface-code error suppression on a different platform. Not a one-off.",
-      added: "2026-06-28",
-      links: [] },
-
-
-    { field: "fusion", date: "2020-Q1", score: 10,
-      title: "JET prepares for D-T campaign",
-      desc: "European tokamak begins deuterium-tritium campaign planning with ITER-like walls.",
-      links: [] },
-
-    { field: "fusion", date: "2021-Q3", score: 25,
-      title: "NIF first burning plasma",
-      desc: "Self-heating from fusion alphas exceeds external heating for the first time.",
-      links: [{ type: "post", label: "LLNL announcement", url: "https://www.llnl.gov/news/national-ignition-facility-experiment-puts-researchers-threshold-fusion-ignition" }] },
-
-    { field: "fusion", date: "2022-Q4", score: 50,
-      title: "NIF net energy gain (Q>1)",
-      desc: "First controlled fusion reaction produces more energy than the laser input drives into the target. Symbolic more than practical, but symbolic matters.",
-      links: [{ type: "post", label: "DOE announcement", url: "https://www.energy.gov/articles/doe-national-laboratory-makes-history-achieving-fusion-ignition" }] },
-
-    { field: "fusion", date: "2023-Q3", score: 55,
-      title: "NIF repeats gain shot",
-      desc: "Second shot exceeds Q>1. Result is reproducible, not a fluke.",
-      links: [] },
-
-    { field: "fusion", date: "2024-Q2", score: 60,
-      title: "JT-60SA first plasma",
-      desc: "World's largest superconducting tokamak reaches first plasma. Steady-state operations research bridge to ITER.",
-      links: [] },
-
-    { field: "fusion", date: "2025-Q1", score: 68,
-      title: "SPARC construction milestone",
-      desc: "Commonwealth Fusion Systems completes cryostat integration on schedule.",
-      links: [] },
-
-    { field: "fusion", date: "2026-Q2", score: 63,
-      title: "SPARC first-plasma window slips to Q1 2027",
-      desc: "Not every quarter is a breakthrough. Integration delay noted in the latest investor update. Honest tracking beats hype.",
-      added: "2026-06-28",
-      links: [] },
-
-
-    { field: "bci", date: "2020-Q3", score: 10,
-      title: "Neuralink pig demo",
-      desc: "Live demonstration of a wireless implant reading neural signals.",
-      links: [] },
-
-    { field: "bci", date: "2021-Q2", score: 18,
-      title: "Monkey plays Pong via BCI",
-      desc: "Neuralink shows real-time cursor control from motor-cortex signals in a primate.",
-      links: [] },
-
-    { field: "bci", date: "2023-Q2", score: 30,
-      title: "FDA clears Neuralink human trial",
-      desc: "PRIME study approved for first-in-human implant.",
-      links: [] },
-
-    { field: "bci", date: "2024-Q1", score: 48,
-      title: "First human implant recipient",
-      desc: "Noland Arbaugh uses the implant for cursor control and gaming. Channel dropouts noted; recovery methods published.",
-      links: [] },
-
-    { field: "bci", date: "2024-Q3", score: 55,
-      title: "Synchron trials expand",
-      desc: "Stentrode-based non-craniotomy approach adds patients across multiple sites.",
-      links: [] },
-
-    { field: "bci", date: "2025-Q2", score: 68,
-      title: "Multi-patient BCI cohort data",
-      desc: "Cross-patient data shows durable channel counts and improving throughput over the first six months.",
-      links: [] },
-
-    { field: "bci", date: "2026-Q2", score: 78,
-      title: "Non-invasive fMRI-to-speech decoder crosses 60%",
-      desc: "UT Austin team pushes past the previous ceiling using transformer-based semantic decoding.",
-      added: "2026-06-28",
-      links: [] }
+    { field: "agi", date: "2019-Q1", score: 5, title: "GPT-2 announced (staged release)", desc: "OpenAI announces a 1.5B parameter LM but withholds full release citing potential misuse risks.", links: [{ type: "post", label: "OpenAI blog", url: "https://openai.com/research/better-language-models" }] },
+    { field: "agi", date: "2020-Q2", score: 15, title: "GPT-3 paper", desc: "175B parameter model demonstrates few-shot learning at scale — the first hint that scaling alone continues to work.", links: [{ type: "paper", label: "arXiv", url: "https://arxiv.org/abs/2005.14165" }] },
+    { field: "agi", date: "2022-Q2", score: 25, title: "Diffusion image models go mainstream", desc: "DALL-E 2, Imagen, and Stable Diffusion release within months of each other. Open-weight release of SD reshapes downstream tooling.", links: [{ type: "post", label: "SD announcement", url: "https://stability.ai/news/stable-diffusion-public-release" }] },
+    { field: "agi", date: "2022-Q4", score: 42, title: "ChatGPT launch", desc: "The consumer moment for LLMs — 100M users in two months. Chat interface, not the model, is the product surface.", links: [{ type: "post", label: "OpenAI announcement", url: "https://openai.com/blog/chatgpt" }] },
+    { field: "agi", date: "2023-Q1", score: 55, title: "GPT-4 and the multimodal frontier", desc: "GPT-4 launches with image input and stronger reasoning. Claude and open-weight LLaMA follow within the same quarter.", links: [{ type: "post", label: "GPT-4 report", url: "https://openai.com/research/gpt-4" }] },
+    { field: "agi", date: "2024-Q1", score: 68, title: "Sora, Claude 3, Gemini 1.5", desc: "Video generation, 200K context, and million-token context arrive together. Long-context becomes table stakes.", links: [] },
+    { field: "agi", date: "2024-Q3", score: 78, title: "o1-style reasoning models", desc: "Test-time compute scaling shows durable gains on hard reasoning benchmarks. A second scaling axis opens.", links: [] },
+    { field: "agi", date: "2025-Q2", score: 86, title: "Agentic frontier consolidation", desc: "Claude 4, GPT-5, and Gemini 2 push multi-step agent capabilities into production.", links: [] },
+    { field: "agi", date: "2026-Q1", score: 94, title: "Sparse MoD scaling laws hold at 400B", desc: "DeepMind paper shows adaptive compute allocation continues efficiency gains past the point earlier work expected saturation.", added: "2026-06-28", links: [] },
+    { field: "quantum", date: "2019-Q4", score: 10, title: "Google quantum supremacy claim", desc: "Sycamore samples a distribution classical supercomputers cannot practically reproduce. Contested, but a threshold moment.", links: [{ type: "paper", label: "Nature paper", url: "https://www.nature.com/articles/s41586-019-1666-5" }] },
+    { field: "quantum", date: "2021-Q4", score: 20, title: "IBM Eagle — 127 qubits", desc: "First >100 qubit processor from IBM. Qubit-count race begins in earnest.", links: [] },
+    { field: "quantum", date: "2022-Q4", score: 30, title: "IBM Osprey — 433 qubits", desc: "Qubit count more than triples in a year, but coherence and gate fidelity remain the binding constraints.", links: [] },
+    { field: "quantum", date: "2023-Q4", score: 40, title: "IBM Condor — 1121 qubits", desc: "First >1000 qubit device. Focus shifts from raw count to error correction.", links: [] },
+    { field: "quantum", date: "2024-Q4", score: 62, title: "Google Willow: below-threshold error correction", desc: "Logical error rate drops as physical qubit count grows — the crossover the field had been waiting for.", links: [{ type: "post", label: "Google blog", url: "https://blog.google/technology/research/google-willow-quantum-chip/" }] },
+    { field: "quantum", date: "2025-Q3", score: 72, title: "Multiple platforms reach 1000+ qubits", desc: "Superconducting, trapped-ion, and neutral-atom systems reach comparable scales. Modality competition sharpens.", links: [] },
+    { field: "quantum", date: "2026-Q2", score: 85, title: "Independent lab confirms below-threshold on a second architecture", desc: "Second team replicates surface-code error suppression on a different platform. Not a one-off.", added: "2026-06-28", links: [] },
+    { field: "fusion", date: "2020-Q1", score: 10, title: "JET prepares for D-T campaign", desc: "European tokamak begins deuterium-tritium campaign planning with ITER-like walls.", links: [] },
+    { field: "fusion", date: "2021-Q3", score: 25, title: "NIF first burning plasma", desc: "Self-heating from fusion alphas exceeds external heating for the first time.", links: [{ type: "post", label: "LLNL announcement", url: "https://www.llnl.gov/news/national-ignition-facility-experiment-puts-researchers-threshold-fusion-ignition" }] },
+    { field: "fusion", date: "2022-Q4", score: 50, title: "NIF net energy gain (Q>1)", desc: "First controlled fusion reaction produces more energy than the laser input drives into the target. Symbolic more than practical, but symbolic matters.", links: [{ type: "post", label: "DOE announcement", url: "https://www.energy.gov/articles/doe-national-laboratory-makes-history-achieving-fusion-ignition" }] },
+    { field: "fusion", date: "2023-Q3", score: 55, title: "NIF repeats gain shot", desc: "Second shot exceeds Q>1. Result is reproducible, not a fluke.", links: [] },
+    { field: "fusion", date: "2024-Q2", score: 60, title: "JT-60SA first plasma", desc: "World's largest superconducting tokamak reaches first plasma. Steady-state operations research bridge to ITER.", links: [] },
+    { field: "fusion", date: "2025-Q1", score: 68, title: "SPARC construction milestone", desc: "Commonwealth Fusion Systems completes cryostat integration on schedule.", links: [] },
+    { field: "fusion", date: "2026-Q2", score: 63, title: "SPARC first-plasma window slips to Q1 2027", desc: "Not every quarter is a breakthrough. Integration delay noted in the latest investor update. Honest tracking beats hype.", added: "2026-06-28", links: [] },
+    { field: "bci", date: "2020-Q3", score: 10, title: "Neuralink pig demo", desc: "Live demonstration of a wireless implant reading neural signals.", links: [] },
+    { field: "bci", date: "2021-Q2", score: 18, title: "Monkey plays Pong via BCI", desc: "Neuralink shows real-time cursor control from motor-cortex signals in a primate.", links: [] },
+    { field: "bci", date: "2023-Q2", score: 30, title: "FDA clears Neuralink human trial", desc: "PRIME study approved for first-in-human implant.", links: [] },
+    { field: "bci", date: "2024-Q1", score: 48, title: "First human implant recipient", desc: "Noland Arbaugh uses the implant for cursor control and gaming. Channel dropouts noted; recovery methods published.", links: [] },
+    { field: "bci", date: "2024-Q3", score: 55, title: "Synchron trials expand", desc: "Stentrode-based non-craniotomy approach adds patients across multiple sites.", links: [] },
+    { field: "bci", date: "2025-Q2", score: 68, title: "Multi-patient BCI cohort data", desc: "Cross-patient data shows durable channel counts and improving throughput over the first six months.", links: [] },
+    { field: "bci", date: "2026-Q2", score: 78, title: "Non-invasive fMRI-to-speech decoder crosses 60%", desc: "UT Austin team pushes past the previous ceiling using transformer-based semantic decoding.", added: "2026-06-28", links: [] }
   ]
 };

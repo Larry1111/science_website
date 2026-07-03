@@ -1,6 +1,32 @@
 (function () {
   const { fields, events } = window.FRONTIER_DATA;
 
+  /* ---------- theme handling ---------- */
+  const themeBtn = document.getElementById("theme-toggle");
+  let isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  if (localStorage.getItem("theme")) {
+    isDark = localStorage.getItem("theme") === "dark";
+  }
+
+  function applyTheme() {
+    if (isDark) document.body.classList.add("dark-mode");
+    else document.body.classList.remove("dark-mode");
+    if (window.chart) {
+      chart.options.scales.x.grid.color = cssGrid();
+      chart.options.scales.y.grid.color = cssGrid();
+      chart.options.scales.x.ticks.color = cssInk3();
+      chart.options.scales.y.ticks.color = cssInk3();
+      chart.update();
+    }
+  }
+  applyTheme();
+
+  themeBtn.addEventListener("click", () => {
+    isDark = !isDark;
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    applyTheme();
+  });
+
   /* ---------- date helpers ---------- */
   const parseDate = (s) => {
     const [y, q] = s.split("-Q");
@@ -35,7 +61,7 @@
   for (const e of all) {
     eventsByField[e.field].push({
       x: e.x, y: e.score, date: e.date, title: e.title,
-      desc: e.desc, links: e.links, delta: e.delta, slug: slug(e), added: e.added
+      desc: e.desc, links: e.links, delta: e.delta, slug: slug(e), added: e.added, score: e.score
     });
   }
 
@@ -43,8 +69,7 @@
   for (const e of all) bySlug[slug(e)] = e;
 
   /* ---------- css var readers ---------- */
-  const cssVar = (name, fallback) =>
-    getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  const cssVar = (name, fallback) => getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
   const cssPaper = () => cssVar("--paper", "#F7F5F0");
   const cssInk3 = () => cssVar("--ink-3", "#898781");
   const cssGrid = () => cssVar("--grid", "#E4E1D8");
@@ -60,14 +85,23 @@
           label: f.label,
           data: eventsByField[k],
           borderColor: f.color,
-          backgroundColor: f.color,
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return f.color + "33"; 
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, f.color + '40'); // 25% opacity
+            gradient.addColorStop(1, f.color + '00'); // Transparent
+            return gradient;
+          },
+          fill: true, // Smooth gradients below the line
           pointBackgroundColor: f.color,
           pointBorderColor: cssPaper(),
           pointBorderWidth: 1.5,
           pointRadius: 5,
           pointHoverRadius: 9,
-          borderWidth: 2,
-          tension: 0.28,
+          borderWidth: 2.5,
+          tension: 0.35, // Smoother curve
           fieldKey: k
         };
       });
@@ -77,26 +111,21 @@
   let pinned = false;
   let selectedSlug = null;
 
-  const chart = new Chart(document.getElementById("chart"), {
+  window.chart = new Chart(document.getElementById("chart"), {
     type: "line",
     data: { datasets: buildDatasets() },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      parsing: false,
+      responsive: true, maintainAspectRatio: false, parsing: false,
       interaction: { mode: "nearest", intersect: false, axis: "xy" },
-      layout: { padding: { top: 8, right: 12, bottom: 4, left: 4 } },
+      layout: { padding: { top: 12, right: 12, bottom: 4, left: 4 } },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "rgba(20,20,16,0.94)",
+          backgroundColor: "rgba(20,20,16,0.9)",
           titleFont: { family: "IBM Plex Mono, monospace", size: 11, weight: "500" },
-          bodyFont: { family: "Inter, sans-serif", size: 12 },
-          titleColor: "#F0EDE3",
-          bodyColor: "#A8A69B",
-          displayColors: false,
-          padding: 10,
-          cornerRadius: 2,
+          bodyFont: { family: "Inter, sans-serif", size: 13 },
+          titleColor: "#F0EDE3", bodyColor: "#A8A69B",
+          displayColors: false, padding: 12, cornerRadius: 6,
           callbacks: {
             title: (items) => {
               const r = items[0].raw;
@@ -107,38 +136,20 @@
           }
         },
         zoom: {
-          zoom: {
-            drag: { enabled: true, backgroundColor: "rgba(42,120,214,0.08)", borderColor: "rgba(42,120,214,0.4)", borderWidth: 1 },
-            mode: "x"
-          },
+          zoom: { drag: { enabled: true, backgroundColor: "rgba(42,120,214,0.1)", borderColor: "rgba(42,120,214,0.5)", borderWidth: 1 }, mode: "x" },
           pan: { enabled: true, mode: "x" }
         }
       },
       scales: {
         x: {
-          type: "linear",
-          min: 2018.75,
-          max: 2026.75,
-          grid: { color: cssGrid(), drawTicks: false },
-          border: { display: false },
-          ticks: {
-            stepSize: 1,
-            color: cssInk3(),
-            font: { family: "IBM Plex Mono, monospace", size: 10 },
-            callback: (v) => (Number.isInteger(v) ? String(v) : "")
-          }
+          type: "linear", min: 2018.75, max: 2026.75,
+          grid: { color: cssGrid(), drawTicks: false }, border: { display: false },
+          ticks: { stepSize: 1, color: cssInk3(), font: { family: "IBM Plex Mono, monospace", size: 11 }, callback: (v) => (Number.isInteger(v) ? String(v) : "") }
         },
         y: {
-          min: 0,
-          max: 100,
-          grid: { color: cssGrid(), drawTicks: false },
-          border: { display: false },
-          ticks: {
-            color: cssInk3(),
-            font: { family: "IBM Plex Mono, monospace", size: 10 },
-            stepSize: 25,
-            callback: (v) => String(v).padStart(3, " ")
-          }
+          min: 0, max: 100,
+          grid: { color: cssGrid(), drawTicks: false }, border: { display: false },
+          ticks: { color: cssInk3(), font: { family: "IBM Plex Mono, monospace", size: 11 }, stepSize: 25, callback: (v) => String(v).padStart(3, " ") }
         }
       },
       onHover: (evt, elements, chartRef) => {
@@ -154,9 +165,7 @@
           const el = elements[0];
           const ds = chartRef.data.datasets[el.datasetIndex];
           selectSignal(ds.data[el.index].slug, { scrollFeed: true });
-        } else {
-          pinned = false;
-        }
+        } else { pinned = false; }
       }
     }
   });
@@ -169,7 +178,6 @@
   const epTitle = document.getElementById("ep-title");
   const epDesc = document.getElementById("ep-desc");
   const epLinks = document.getElementById("ep-links");
-
   const LINK_ICONS = { video: "▶", paper: "¶", post: "✎", code: "⌘" };
 
   function updatePanel(fieldKey, point) {
@@ -179,15 +187,14 @@
     epField.style.color = f.text;
     const d = point.delta == null ? "" : " (" + (point.delta >= 0 ? "+" : "") + point.delta + ")";
     epDate.textContent = fmtQ(point.x);
-    epScore.textContent = point.y + d;
+    epScore.innerHTML = `<span class="v">${point.y}</span>${d}`;
     epTitle.textContent = point.title;
     epDesc.textContent = point.desc;
     epLinks.innerHTML = point.links
       .map((l) => {
         const icon = l.type && LINK_ICONS[l.type] ? LINK_ICONS[l.type] + " " : "";
         return `<a href="${l.url}" target="_blank" rel="noopener">${icon}${l.label} ↗</a>`;
-      })
-      .join("");
+      }).join("");
   }
 
   /* ---------- central selection ---------- */
@@ -200,7 +207,6 @@
 
     if (history.replaceState) history.replaceState(null, "", "#" + sl);
 
-    // highlight on chart if the field is visible
     const dsIndex = chart.data.datasets.findIndex((d) => d.fieldKey === e.field);
     if (dsIndex >= 0) {
       const ptIndex = chart.data.datasets[dsIndex].data.findIndex((p) => p.slug === sl);
@@ -211,7 +217,6 @@
       }
     }
 
-    // sync feed highlight
     document.querySelectorAll(".feed-row").forEach((r) => {
       const sel = r.dataset.slug === sl;
       r.classList.toggle("selected", sel);
@@ -235,12 +240,16 @@
   copyBtn.addEventListener("click", copyLink);
   copyBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") copyLink(); });
 
-  /* ---------- keyboard navigation (chronological) ---------- */
+  /* ---------- keyboard nav ---------- */
   document.addEventListener("keydown", (e) => {
-    if (e.target.matches("input, textarea")) return;
+    if (e.target.matches("input, textarea, select")) return;
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const sortMode = document.getElementById("feed-sort").value;
     const visible = all.filter((ev) => activeFields.has(ev.field));
     if (!visible.length) return;
+    
+    // Default keyboard nav is chronological regardless of sort dropdown, 
+    // to keep arrow keys matched to the chart's X-axis
     let idx = visible.findIndex((ev) => slug(ev) === selectedSlug);
     if (idx === -1) idx = visible.length - 1;
     else idx += e.key === "ArrowRight" ? 1 : -1;
@@ -334,6 +343,7 @@
   const feedCount = document.getElementById("feed-count");
   const feedNew = document.getElementById("feed-new");
   const feedSearch = document.getElementById("feed-search");
+  const feedSort = document.getElementById("feed-sort");
   const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   function renderFeedNew() {
@@ -345,10 +355,16 @@
 
   function renderFeed() {
     const q = feedSearch.value.trim().toLowerCase();
+    const sortMode = feedSort.value;
+
     const rows = all
       .filter((e) => activeFields.has(e.field))
       .filter((e) => !q || (e.title + " " + e.desc + " " + fields[e.field].label).toLowerCase().includes(q))
-      .sort((a, b) => b.x - a.x);
+      .sort((a, b) => {
+        if (sortMode === "newest") return b.x - a.x;
+        if (sortMode === "oldest") return a.x - b.x;
+        if (sortMode === "highest") return b.score - a.score;
+      });
 
     feedCount.textContent = rows.length + " signal" + (rows.length === 1 ? "" : "s");
     renderFeedNew();
@@ -358,7 +374,6 @@
       const clearBtn = document.getElementById("feed-clear");
       const clear = () => { feedSearch.value = ""; renderFeed(); feedSearch.focus(); };
       clearBtn.addEventListener("click", clear);
-      clearBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); clear(); } });
       return;
     }
 
@@ -366,7 +381,12 @@
     let year = null;
     for (const e of rows) {
       const y = Math.floor(e.x);
-      if (y !== year) { year = y; html += `<div class="feed-year">${y}</div>`; }
+      // Only show year headers if sorting chronologically
+      if (y !== year && (sortMode === "newest" || sortMode === "oldest")) { 
+        year = y; 
+        html += `<div class="feed-year">${y}</div>`; 
+      }
+      
       const f = fields[e.field];
       const nw = isNew(e) ? `<span class="new-chip">new</span>` : "";
       html += `
@@ -389,6 +409,7 @@
     if (row) { selectSignal(row.dataset.slug, { scrollPanel: true }); e.preventDefault(); }
   });
   feedSearch.addEventListener("input", renderFeed);
+  feedSort.addEventListener("change", renderFeed);
 
   /* ---------- init ---------- */
   document.getElementById("signal-count").textContent = String(events.length).padStart(3, "0");
